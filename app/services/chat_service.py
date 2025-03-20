@@ -1,4 +1,3 @@
-import time
 from app.utils.model import llm
 from app.utils.vectorstore import retriever
 from app.utils.database import get_collection
@@ -16,7 +15,7 @@ class ChatService:
         You are an IT expert that helps employees solve any issue they face.
 
         Use the following piece of context to help you generate a correct answer to the question at the end.
-        If the answer requires you to recall something from an earlier conversation, use Session Memory and Time to know the closest responses to the question, as it can help you remember important information needed to respond to the question.
+        If the answer requires you to recall something from an earlier conversation, use Session Memory, as it can help you remember important information needed to respond to the question.
         If you don't know, say that you don't know.
 
         Context:
@@ -24,9 +23,6 @@ class ChatService:
 
         Session Memory:
         {session_memory}
-
-        Time:
-        {time}
 
         Question:
         {question}
@@ -37,13 +33,12 @@ class ChatService:
         chain = (
             {
                 'context': retriever, 
-                'session_memory': RunnableLambda(lambda _: str(get_collection().find_one({}, sort=[("session_id", -1)])['messages'])), 
-                'time': RunnableLambda(lambda _: time.strftime('%H:%M:%S %d-%m-%Y', time.localtime())), 
+                'session_memory': RunnableLambda(lambda _: get_collection().find_one({'session_id': self.session_id})['messages']), 
                 'question': RunnablePassthrough()
             } | prompt_template | llm | StrOutputParser()
         )
-        
         return chain
 
-    def generate_response(self, prompt):
+    def generate_response(self, prompt, session_id: int):
+        self.session_id = session_id
         return self.chain.invoke(prompt)

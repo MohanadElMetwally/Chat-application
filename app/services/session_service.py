@@ -19,18 +19,22 @@ class SessionService:
             return new_session_id
         return last_session['session_id']
 
+    # returns a session specified by id
+    def get_session(self, session_id):
+        return self.collection.find_one({'session_id': session_id})['session_id']
+
     def update_session(self, session_id: int, question: str, response: str) -> None:
         update_data = {
             '$push': {
                 'messages': {
                     '$each': [
                         {
-                            'role': 'human',
+                            'role': 'user',
                             'sent_at': time.strftime('%H:%M:%S %d-%m-%Y', time.localtime()),
                             'question': question
                         },
                         {
-                            'role': 'ai',
+                            'role': 'assistant',
                             'responded_at': time.strftime('%H:%M:%S %d-%m-%Y', time.localtime()),
                             'answer': response[response.find('</think>') + len('</think>'):].strip()
                         }
