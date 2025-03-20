@@ -53,7 +53,7 @@ Run the following command to install the necessary Python libraries:
 pip install -r requirements.txt
 ```
 
-4. **4. Pull the Required Models with Ollama**
+4. **Pull the Required Models with Ollama**
 Before running the application, you need to download the required models using Ollama. Run the following commands:  
 
 - **Download the main LLM model:**  
